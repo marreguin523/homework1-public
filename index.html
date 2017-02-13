@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    .bar {
+      fill: gray;
+    }
+    
+    .grid line {
+      stroke: gray;
+      stroke-opacity: 0.2;
+      shape-rendering: crispEdges;
+    }
+    .grid path {
+      stroke-width: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script>
+    var margin = {top: 35, right: 80, bottom: 80, left: 80},
+        width = 960 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+    
+		var x = d3.scaleBand().rangeRound([0, width]),
+    		y = d3.scaleLinear().rangeRound([height, 0]);
+    
+    var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom);
+    
+		var g = svg.append("g")
+    		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    function make_y_gridlines() {		
+        return d3.axisLeft(y)
+            .ticks(10)
+    }
+  d3.csv("https://raw.githubusercontent.com/usf-cs360-2017/homework1-marreguin523/gh-pages/data2.csv?token=AUSIYgEZ4jcrntcNbLndUkEBsnfTPG2iks5Yqxw8wA%3D%3D", function(error, data) {
+      data.forEach(function(d) {
+        	d.Resolution = d.Resolution
+          d.Count = +d.Count;
+      });
+    x.domain(data.map(function(d) { return d.Resolution; }));
+    y.domain([0, d3.max(data, function(d) { return d.Count; })]);
+    svg.append("g")
+    		.attr("transform", "translate("+margin.left+", "+margin.top+")")
+        .attr("class", "grid")
+        .call(make_y_gridlines()
+            .tickSize(-width)
+            .tickFormat("")
+        )
+    
+    g.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x))
+    .selectAll("text").filter(function(d) {if(d.Resolution=="NONE") return true})
+      .attr("dx", 40)
+      .attr("dy", 10);
+    g.append("g")
+        .call(d3.axisLeft(y))
+    .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", -50)
+        .attr("dx", -130)
+        .attr("dy", "0.71em")
+        .style("font", "10px sans-serif")
+        .attr("fill", "#000")
+        .text("LARCENY/THEFT");
+    g.selectAll(".bar")
+      .data(data)
+      .enter().append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d) { return x(d.Resolution)+72; })
+        .attr("y", function(d) { return y(d.Count); })
+        .attr("width", x.bandwidth()/2)
+        .attr("height", function(d) { return height - y(d.Count); });
+  });
+  </script>
+</body>
+</html>
